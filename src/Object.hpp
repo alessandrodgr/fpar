@@ -30,6 +30,10 @@ namespace fp {
 
   typedef std::shared_ptr<Object> ObjectPtr;
 
+  /*
+    Il bottom è modellato come null pointer
+      => Bottom check == NULL check
+  */
   constexpr auto Bottom = nullptr;
 
 }

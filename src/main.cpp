@@ -5,7 +5,7 @@
 
 using namespace fp;
 
-
+// Stampa di atomi e/o sequenze (omogenee)
 template <typename T>
 ObjectPtr print (const ObjectPtr& x) {
   if(x == Bottom) return Bottom;

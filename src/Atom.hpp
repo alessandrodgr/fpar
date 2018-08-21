@@ -43,7 +43,7 @@ namespace fp {
      */
     inline static std::shared_ptr<Atom<T>>
     to_atom (const std::shared_ptr<Object> obj) {
-      return std::static_pointer_cast<Atom<T>>(obj);
+      return std::static_pointer_cast<Atom<T>>(obj); // cast statico!
     }
 
     /*! \brief Conversion operator da Atom<T> a T

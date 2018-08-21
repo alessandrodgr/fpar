@@ -5,8 +5,7 @@
  * Definizione del tipo Sequence
  * Definizione del tipo delle sequenze di un sistema FP like.
  * Al contrario del sistema descritto da Backus nel suo articolo i costruttori
- * non sono bottom preserving. Le sequenze sono implementate come struttre dati
- * ricorsive e immutabili.
+ * non sono bottom preserving.
  */
 
 #include "Object.hpp"
@@ -24,7 +23,7 @@ namespace fp {
    *  \brief Tipo delle sequenze
    *
    *  Le sequenze sono definite ricorsivamente come una deque (della STL)
-   *  di puntatori a oggetti e come oggetti stessi. La struttra è immutabile.
+   *  di puntatori a oggetti e come oggetti stessi.
    */
   class Sequence : public Object, public ObjectPtrDeque {
   private:
@@ -62,17 +61,30 @@ namespace fp {
       return std::make_unique<Sequence>( Sequence() );
     }
 
+    /*! \brief Factory method sequenza non vuota
+     *  \param init Sequenza di inizializzazione
+     *  \return Puntatore a sequenza non vuota
+     */
     inline static std::shared_ptr<Sequence>
     make_sequence (std::initializer_list<ObjectPtr> init) {
       return std::make_unique<Sequence>( Sequence(init) );
     }
 
+    /*! \brief Factory method sequenza non vuota da iteratori
+     *  \param first Inizio sequenza di inizializzazione
+     *  \param last Fine sequenza di inizializzazione
+     *  \return Puntatore a sequenza non vuota
+     */
     template <typename InputIterator>
     inline static std::shared_ptr<Sequence>
     make_sequence (InputIterator first, InputIterator last) {
       return std::make_unique<Sequence>( Sequence(first, last) );
     }
 
+    /*! \brief Factory method sequenza non vuota di n Bottom
+     *  \param n Elementi della sequenza
+     *  \return Puntatore a sequenza non vuota
+     */
     inline static std::shared_ptr<Sequence>
     make_sequence (size_type n) {
       return std::make_unique<Sequence>( Sequence(n) );
@@ -85,7 +97,7 @@ namespace fp {
      */
     inline static std::shared_ptr<Sequence>
     to_sequence (std::shared_ptr<Object> obj) {
-      return std::static_pointer_cast<Sequence>(obj); // cast statico!!
+      return std::static_pointer_cast<Sequence>(obj); // cast statico!
     }
 
 
