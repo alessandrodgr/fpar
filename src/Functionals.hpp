@@ -23,6 +23,12 @@
 
 namespace fp {
 
+  /*
+   I funzionali (o functional forms) restituiscono funzioni.
+   Nello specifico, in questa implementazione, restituiscono lambda
+  */
+
+
   template <typename F, typename G>
   inline auto compose (F f, G g) {
     return [=](const auto& x) {
@@ -33,19 +39,11 @@ namespace fp {
   template <typename F>
   inline auto construct (std::initializer_list<F> fs, bool par = true) {
     return [=](const auto& x) {
-      SequencePtr res;
-      if(par) {
-        auto fs_list = fs.begin();
-        res = Sequence::make_sequence(fs.size());
-        #pragma omp parallel for
-        for(size_t i = 0; i < fs.size(); i++) {
-          (*res)[i] = (fs_list[i])(x);
-        }
-      } else {
-        res = Sequence::make_sequence();
-        for(auto& f : fs) {
-          res->push_back(f(x));
-        }
+      auto fs_list = fs.begin();
+      auto res = Sequence::make_sequence(fs.size());
+      #pragma omp parallel for if(par)
+      for(size_t i = 0; i < fs.size(); i++) {
+        (*res)[i] = (fs_list[i])(x);
       }
       return res;
     };
@@ -132,33 +130,17 @@ namespace fp {
   inline auto apply_to_all (F f, bool par = true) {
     return [=](const SequencePtr& x) -> SequencePtr {
       if(x == Bottom) return Bottom;
-      SequencePtr res;
-      if(par) {
-        res = Sequence::make_sequence(x->size());
-        #pragma omp parallel for
-        for(size_t i = 0; i < x->size(); i++) {
-          if constexpr (std::is_same_v<T, Sequence>) {
-            auto s = Sequence::to_sequence((*x)[i]);
-            (*res)[i] = f(s);
-          } else if constexpr (std::is_same_v<T, Object>) {
-            (*res)[i] = f((*x)[i]);
-          } else {
-            auto a = Atom<T>::to_atom((*x)[i]);
-            (*res)[i] = f(a);
-          }
-        }
-      } else {
-        res = Sequence::make_sequence();
-        for(auto& el : *x) {
-          if constexpr (std::is_same_v<T, Sequence>) {
-            auto s = Sequence::to_sequence(el);
-            res->push_back(f(s));
-          } else if constexpr (std::is_same_v<T, Object>) {
-            res->push_back(f(el));
-          } else {
-            auto a = Atom<T>::to_atom(el);
-            res->push_back(f(a));
-          }
+      auto res = Sequence::make_sequence(x->size());
+      #pragma omp parallel for if(par)
+      for(size_t i = 0; i < x->size(); i++) {
+        if constexpr (std::is_same_v<T, Sequence>) {
+          auto s = Sequence::to_sequence((*x)[i]);
+          (*res)[i] = f(s);
+        } else if constexpr (std::is_same_v<T, Object>) {
+          (*res)[i] = f((*x)[i]);
+        } else {
+          auto a = Atom<T>::to_atom((*x)[i]);
+          (*res)[i] = f(a);
         }
       }
       return res;

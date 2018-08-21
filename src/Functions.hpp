@@ -70,18 +70,10 @@ namespace fp {
       auto _zs = x->back();
       if(!_zs || _zs->type() != SEQUENCE) return Bottom;
       auto zs = Sequence::to_sequence(_zs);
-      SequencePtr res;
-      if(par) {
-        res = Sequence::make_sequence(zs->size());
-        #pragma omp parallel for
-        for(size_t i = 0; i < zs->size(); i++) {
-          (*res)[i] = Sequence::make_sequence({y, (*zs)[i]});
-        }
-      } else {
-        res = Sequence::make_sequence();
-        for(auto& z : *zs) {
-          res->push_back(Sequence::make_sequence({y, z}));
-        }
+      auto res = Sequence::make_sequence(zs->size());
+      #pragma omp parallel for if(par)
+      for(size_t i = 0; i < zs->size(); i++) {
+        (*res)[i] = Sequence::make_sequence({y, (*zs)[i]});
       }
       return res;
     };
@@ -95,18 +87,10 @@ namespace fp {
       auto z = x->back();
       if(!_ys || _ys->type() != SEQUENCE) return Bottom;
       auto ys = Sequence::to_sequence(_ys);
-      SequencePtr res;
-      if(par) {
-        res = Sequence::make_sequence(ys->size());
-        #pragma omp parallel for
-        for(size_t i = 0; i < ys->size(); i++) {
-          (*res)[i] = Sequence::make_sequence({(*ys)[i], z});
-        }
-      } else {
-        res = Sequence::make_sequence();
-        for(auto& y : *ys) {
-          res->push_back(Sequence::make_sequence({y, z}));
-        }
+      auto res = Sequence::make_sequence(ys->size());
+      #pragma omp parallel for if(par)
+      for(size_t i = 0; i < ys->size(); i++) {
+        (*res)[i] = Sequence::make_sequence({(*ys)[i], z});
       }
       return res;
     };
