@@ -64,7 +64,7 @@ int main(int argc, char const *argv[]) {
   seq_t_i = std::chrono::high_resolution_clock::now();
   seq_MM(MN);
   seq_t_f = std::chrono::high_resolution_clock::now();
-  int seq_elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+  int seq_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
                     (seq_t_f-seq_t_i).count();
 
   // moltiplicazione parallela
@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
   par_t_i = std::chrono::high_resolution_clock::now();
   MM(MN);
   par_t_f = std::chrono::high_resolution_clock::now();
-  int par_elapsed = std::chrono::duration_cast<std::chrono::microseconds>
+  int par_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>
                     (par_t_f-par_t_i).count();
 
   // risultati
