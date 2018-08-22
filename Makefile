@@ -6,7 +6,7 @@ else
 CXX	=	g++
 endif
 
-OPT =	-O3
+OPT =	-O0
 CXXFLAGS	=	--std=c++17 $(OPT) -Wall -pedantic-errors -Wno-unused-variable -fopenmp -pthread
 TARGET   = main
 SRCDIR   = src
