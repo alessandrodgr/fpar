@@ -1,41 +1,50 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-/** \file Object.hpp
- * Definizione dell'interfaccia Object
- * Definizione di un'interfaccia comune per un sistema di tipi FP like
- */
-
-#include <memory>
+#include <variant>
+#include <immer/box.hpp>
+#include <immer/flex_vector.hpp>
 
 namespace fp {
 
-  /*! Enumerazione dei tipi */
-  enum object_type {
-    ATOM,
-    SEQUENCE
-  };
-
-  /*! \class Object
-   *  \brief Interfaccia comune dei tipi
-   *
-   */
+  template <typename... Ts>
   class Object {
-  protected:
-    object_type _type;
+  private:
+    std::variant<std::monostate,
+                 bool,
+                 size_t,
+                 Ts...,
+                 immer::flex_vector<immer::box<Object<Ts...>>>> _obj;
+
   public:
-    virtual ~Object () = default;
-    object_type type () const { return _type; }
+    Object() {}
+
+    template <typename T>
+    Object(const T& obj) : _obj(obj) {}
+
+    template <typename T>
+    operator T () const {
+      return std::get<T>(_obj);
+    }
+
+    constexpr bool isBottom () const noexcept {
+      return std::holds_alternative<std::monostate>(_obj);
+    }
+
+    constexpr bool isSequence () const noexcept {
+      return std::holds_alternative<immer::flex_vector<immer::box<Object<Ts...>>>>(_obj);
+    }
+
+    template <typename T>
+    constexpr bool is () const noexcept {
+      return std::holds_alternative<T>(_obj);
+    }
   };
 
-  typedef std::shared_ptr<Object> ObjectPtr;
+  constexpr auto Bottom = std::monostate();
 
-  /*
-    Il bottom è modellato come null pointer
-      => Bottom check == NULL check
-  */
-  constexpr auto Bottom = nullptr;
-
+  template <typename T>
+  using Sequence = immer::flex_vector<immer::box<T>>;
 }
 
 #endif

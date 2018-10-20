@@ -1,23 +1,26 @@
-UNAME := $(shell uname)
-
-ifeq ($(UNAME), Darwin) # MacOS (su mac omp funziona solo con g++-v)
-CXX = $(shell ls /usr/local/bin | grep ^g++- | head -n 1) # latest g++-version
-else
-CXX	=	g++
-endif
-
-OPT =	-O0
-CXXFLAGS	=	--std=c++17 $(OPT) -Wall -pedantic-errors -Wno-unused-variable -fopenmp -pthread
-TARGET   = main
-SRCDIR   = src
+CXX = g++
+OPT =	-O2
+NOOPT =	-O0
+CXXFLAGS =	--std=c++17 -Wall -Isrc -pedantic-errors -Wno-unused-variable -fcilkplus -lcilkrts
+SRCDIR   = src/test
 BINDIR   = bin
+HEADER	 = src/Backus.hpp src/Object.hpp	\
+					 src/Functions.hpp src/Functionals.hpp
 
-$(BINDIR)/$(TARGET):	$(SRCDIR)/main.cpp
-	$(CXX) $(CXXFLAGS) $^ -o $@
+all: matrix_mul num_of_evens toy_example
 
-.PHONY: clean memcheck
+matrix_mul: $(SRCDIR)/matrix_mul.cpp $(HEADER)
+	$(CXX) $(CXXFLAGS) $(NOOPT) $^ -o $(BINDIR)/$@ &
+	$(CXX) $(CXXFLAGS) $(OPT) $^ -o $(BINDIR)/$@_opt
+
+num_of_evens: $(SRCDIR)/num_of_evens.cpp $(HEADER)
+	$(CXX) $(CXXFLAGS) $(NOOPT) $^ -o $(BINDIR)/$@ &
+	$(CXX) $(CXXFLAGS) $(OPT) $^ -o $(BINDIR)/$@_opt
+
+toy_example: $(SRCDIR)/toy_example.cpp $(HEADER)
+	$(CXX) $(CXXFLAGS) $(NOOPT) $^ -o $(BINDIR)/$@ &
+	$(CXX) $(CXXFLAGS) $(OPT) $^ -o $(BINDIR)/$@_opt
+
+.PHONY: clean
 clean:
-	rm -f $(OBJ) $(BINDIR)/$(TARGET)
-
-memcheck:
-	valgrind --leak-check=full $(BINDIR)/$(TARGET)
+	rm -f $(BINDIR)/*
