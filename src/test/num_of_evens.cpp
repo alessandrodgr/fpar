@@ -36,8 +36,8 @@ int main(int argc, char const *argv[]) {
     std::move(in).push_back(i);
   }
 
-  auto toInt = [&](bool par) {
-    return [&](const Integer& x) {
+  auto toInt = [=](bool par) {
+    return [=](const Integer& x) {
       auto y = construct<Integer>(
                 {id<Integer>, tt},
                 par
@@ -48,7 +48,7 @@ int main(int argc, char const *argv[]) {
     };
   };
 
-  auto isEven = [&](const Integer& x) {
+  auto isEven = [=](const Integer& x) {
     long mod2 = (long)x % 2;
     return equals<long>((Integer)Sequence<Integer>({mod2, 0l}));
   };

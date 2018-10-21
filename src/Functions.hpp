@@ -3,7 +3,7 @@
 
 #include "Object.hpp"
 #include <vector>
-#include <cilk/cilk.h>
+#include <omp.h>
 
 namespace fp {
 
@@ -56,20 +56,17 @@ namespace fp {
       if (_zs.isBottom() or !_zs.isSequence()) return Bottom;
       Sequence<T> zs = _zs; // cast a sequenza
       auto res = Sequence<T>(zs.size());
-      // auto res = std::vector<T>(zs.size());
       if (par) {
-        cilk_for (size_t i = 0; i < zs.size(); i++) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < zs.size(); i++) {
           std::move(res).set(i, Sequence<T>({y, zs[i]}));
-          // res[i] = Sequence<T>({y, zs[i]});
         }
       } else {
         for (size_t i = 0; i < zs.size(); i++) {
           std::move(res).set(i, Sequence<T>({y, zs[i]}));
-          // res[i] = Sequence<T>({y, zs[i]});
         }
       }
       return res;
-      // return Sequence<T>(res.begin(), res.end());
     };
   }
 
@@ -85,20 +82,17 @@ namespace fp {
       if (_ys.isBottom() or !_ys.isSequence()) return Bottom;
       Sequence<T> ys = _ys; // cast a sequenza
       auto res = Sequence<T>(ys.size());
-      // auto res = std::vector<T>(ys.size());
       if (par) {
-        cilk_for (size_t i = 0; i < ys.size(); i++) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < ys.size(); i++) {
           std::move(res).set(i, Sequence<T>({ys[i], z}));
-          // res[i] = Sequence<T>({ys[i], z});
         }
       } else {
         for (size_t i = 0; i < ys.size(); i++) {
           std::move(res).set(i, Sequence<T>({ys[i], z}));
-          // res[i] = Sequence<T>({ys[i], z});
         }
       }
       return res;
-      // return Sequence<T>(res.begin(), res.end());
     };
   }
 
@@ -165,9 +159,7 @@ namespace fp {
     for (auto _row : s) {
       if (_row->isBottom() or !_row->isSequence()) return Bottom;
       seq_t* row = new seq_t(*_row); // problema è qua
-      // std::cout << (int)*row.front() << std::endl;
       if (els == 0 or row->size() < els) els = row->size();
-      // std::cout << (int)**row.begin() << std::endl;
       row_heads.push_back(row->begin());
     }
 

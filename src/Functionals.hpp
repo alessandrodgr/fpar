@@ -14,14 +14,10 @@
 #include <vector>
 #include <functional>
 #include <numeric>
-// #include <type_traits>
 #include <future>
 #include <thread>
-// #include <omp.h>
+#include <omp.h>
 #include <algorithm>
-#include <cilk/cilk.h>
-// #include <cilk/reducer.h>
-#include <cilk/cilk_api.h>
 #include <iostream>
 
 namespace fp {
@@ -38,20 +34,17 @@ namespace fp {
     return [=](const T& x) -> T {
       auto fs_list = fs.begin();
       auto res = Sequence<T>(fs.size());
-      // auto res = std::vector<T>(fs.size());
       if(par) {
-        cilk_for (size_t i = 0; i < fs.size(); i++) {
-          // res[i] = (fs_list[i])(x);
+        #pragma omp parallel for
+        for (size_t i = 0; i < fs.size(); i++) {
           std::move(res).set(i, (fs_list[i])(x));
         }
       } else {
         for(size_t i = 0; i < fs.size(); i++) {
-          // res[i] = (fs_list[i])(x);
           std::move(res).set(i, (fs_list[i])(x));
         }
       }
       return res;
-      // return Sequence<T>(res.begin(), res.end());
     };
   }
 
@@ -110,14 +103,15 @@ namespace fp {
         };
       if (par) {
         auto els = s.size();
-        auto n_threads = __cilkrts_get_nworkers();
+        auto n_threads = omp_get_max_threads();
         auto locals = std::vector<decltype(f(x))>(n_threads);
         auto local_acc = [&](auto first, auto last){
           return std::accumulate(first, last, operand_t(n), combinator);
         };
         auto firstel = s.begin();
 
-        cilk_for (auto i = 0; i < n_threads; i++) {
+        #pragma omp parallel for num_threads(n_threads)
+        for (auto i = 0; i < n_threads; i++) {
           locals[i] = local_acc(firstel + els*i/n_threads, firstel + els*(i+1)/n_threads);
         }
         return std::accumulate(locals.begin(), locals.end(), operand_t(n), combinator);
@@ -137,21 +131,17 @@ namespace fp {
       if (x.isBottom() or !x.isSequence()) return Bottom;
       Sequence<T> s = x;
       auto res = Sequence<T>(s.size());
-      // auto res = std::vector<T>(s.size());
       if (par) {
-        // #pragma omp parallel for
-        cilk_for (size_t i = 0; i < s.size(); i++) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < s.size(); i++) {
           std::move(res).set(i, f(s[i]));
-          // res[i] = f(s[i]);
         }
       } else {
         for(size_t i = 0; i < s.size(); i++) {
-          // res[i] = f(s[i]);
           std::move(res).set(i, f(s[i]));
         }
       }
       return res;
-      // return Sequence<T>(res.begin(), res.end());
     };
   }
 
