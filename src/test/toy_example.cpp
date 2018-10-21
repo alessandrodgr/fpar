@@ -5,8 +5,10 @@
 
 using namespace fp;
 
+// istanzio il type system con il supporto per int, bool, float e std::string
 using Basic = Object<int, bool, float, std::string>;
 
+// per qualsiasi x aspetta 1 secondo e restituisce Bottom
 inline Basic foo (const Basic& x) {
   std::this_thread::sleep_for (std::chrono::seconds(1));
   return Bottom;

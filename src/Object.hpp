@@ -1,12 +1,26 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+/** \file Object.hpp
+ * Definizione del type system
+ * Definizione del type system di un sistema FP like.
+ */
+
 #include <variant>
 #include <immer/box.hpp>
 #include <immer/flex_vector.hpp>
 
 namespace fp {
 
+  /*! \class Object
+   *  \brief Tipo degli oggetti di un sistema FP like.
+   *         E' un tipo generico e ricorsivo che comprende:
+   *          - bottom
+   *          - tipi di base specifici: bool e size_t
+   *          - tipi di base generici
+   *          - tipo delle sequenze
+   *
+   */
   template <typename... Ts>
   class Object {
   private:
@@ -41,8 +55,17 @@ namespace fp {
     }
   };
 
+  /*
+    Variabile globale costante che assume il tipo Bottom.
+    Utile se lo si vuole ritornare da una funzione:
+      return Bottom; invece di return std::monostate();
+      ==> più leggibile
+  */
   constexpr auto Bottom = std::monostate();
 
+  /*
+    Type alias per le sequenze, anche queste generiche
+  */
   template <typename T>
   using Sequence = immer::flex_vector<immer::box<T>>;
 }

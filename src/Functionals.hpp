@@ -3,9 +3,9 @@
 
 /** \file Functionals.hpp
  * Definizione dei funzionali
- * Definizione dei funzionali in un sistema FP like. Sono espressioni che
- * denotano funzioni, in input prendono oggetti (Atom o Sequence) e
- * funzioni (primitive o definite) e restituiscono oggetti
+ * Definizione dei funzionali in un sistema FP like. Sono i costrutti necessari
+ * alla costruzione di programmi a partire da altri programmi. In altri termini
+ * sono le operazioni definite sull'algebra di programmi.
  */
 
 #include "Object.hpp"
@@ -18,10 +18,19 @@
 #include <thread>
 #include <omp.h>
 #include <algorithm>
-#include <iostream>
 
 namespace fp {
 
+  /*
+   I funzionali (o functional forms) restituiscono funzioni.
+   Nello specifico, in questa implementazione, restituiscono lambda expressions
+  */
+
+  /*! \brief Composizione di funzioni
+   *  \param f Funzione più esterna
+   *  \param g Funzione più interna
+   *  \return x -> f(g(x))
+   */
   template <typename F, typename G>
   inline auto compose (F f, G g) {
     return [=](const auto& x) {
@@ -29,6 +38,11 @@ namespace fp {
     };
   }
 
+  /*! \brief Costruisce sequenze a partire da funzioni
+   *  \param fs Insieme di funzioni da applicare per costruire la sequenza
+   *  \param par se true eseguito su più thread
+   *  \return x -> <f1(x), f2(x), ..., fN(x)>
+   */
   template <typename T, typename F>
   inline auto construct (std::initializer_list<F> fs, bool par) {
     return [=](const T& x) -> T {
@@ -48,6 +62,13 @@ namespace fp {
     };
   }
 
+  /*! \brief Costrutto "if-then-else"
+   *  \param p Funzione di "guardia"
+   *  \param f Applicazione ramo then
+   *  \param g Applicazione ramo else
+   *  \param par se true eseguito su più thread
+   *  \return x -> (p(x) ? f(x) : g(x))
+   */
   template <typename T, typename P, typename F, typename G>
   inline auto condition (P p, F f, G g, bool par) {
     return [=](const T& x) -> T {
@@ -79,6 +100,10 @@ namespace fp {
     };
   }
 
+  /*! \brief Funzione costante
+   *  \param c Valore da incapsulare in un atomo costante
+   *  \return x -> c
+   */
   template <typename T>
   inline auto constant (T&& c) {
     return [=](const T& x) -> T {
@@ -87,6 +112,12 @@ namespace fp {
     };
   }
 
+  /*! \brief Operazione di "fold"
+   *  \param f Funzione di riduzione
+   *  \param par se true eseguito su più thread
+   *  \param uf Valore di accumulazione di default
+   *  \return <x1, x2, .., xN> -> f(uf, f(x1, f(x2, ...f(xN-1, xN))))
+   */
   template <typename T, typename F>
   inline auto insert (F f, bool par, const T& n) {
     return [=](const T& x) -> T {
@@ -125,6 +156,11 @@ namespace fp {
     };
   }
 
+  /*! \brief Operazione di "map"
+   *  \param f Funzione da applicare agli elementi di una sequenza
+   *  \param par se true eseguito su più thread
+   *  \return <x1, x2, .., xN> -> <f(x1), f(x2), ..., f(xN)>
+   */
   template <typename T, typename F>
   inline auto apply_to_all (F f, bool par) {
     return [=](const T& x) -> T {
@@ -145,6 +181,11 @@ namespace fp {
     };
   }
 
+  /*! \brief Rende f una funzione unaria (simile al currying)
+   *  \param f Funzione da rendere unaria
+   *  \param x Primo parametro da passare a f
+   *  \return y -> f(<x,y>)
+   */
   template <typename T, typename F>
   inline auto binary_to_unary (F f, const T& x) {
     return [=](const T& y) -> T {
@@ -153,6 +194,11 @@ namespace fp {
     };
   }
 
+  /*! \brief Costrutto di iterazione
+   *  \param p Funzione di "guardia"
+   *  \param f "Corpo" del while
+   *  \return x -> {while(p(x)) {x = f(x)}; return x;}
+   */
   template <typename T, typename P, typename F>
   inline auto while_form (P p, F f) {
     return [=](const T& x) -> T {

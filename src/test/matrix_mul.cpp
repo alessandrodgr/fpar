@@ -5,6 +5,7 @@
 
 using namespace fp;
 
+// istanzio il type system con il supporto per int e double
 using Number = Object<int, double>;
 
 inline Number select1 (const Number& x) {
@@ -16,6 +17,8 @@ inline Number select2AndTrans (const Number& x) {
 }
 
 int main(int argc, char const *argv[]) {
+
+  // costruisco l'input
   auto v = Sequence<Number>();
   for(size_t i = 0; i < 1000; i++) {
     auto w = Sequence<Number>();
@@ -24,8 +27,8 @@ int main(int argc, char const *argv[]) {
     }
     std::move(v).push_back(w);
   }
-
   Number in = Sequence<Number>({v,v});
+
 
   auto IP = [=](bool par) {
     auto mul = mul_op<int, Number>;

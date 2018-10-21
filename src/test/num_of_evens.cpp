@@ -5,6 +5,7 @@
 
 using namespace fp;
 
+// istanzio il type system con il supporto per int e long
 using Integer = Object<int, long>;
 
 /*
