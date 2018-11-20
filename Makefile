@@ -9,13 +9,13 @@ HEADER	 = $(SRCDIR)/Backus.hpp \
 					 $(SRCDIR)/Functions.hpp \
 					 $(SRCDIR)/Functionals.hpp
 TARGETS	 = matrix_mul \
-					 num_of_evens \
-					 toy_example
+					 toy_example	\
+					 sort_all
 
 all: $(TARGETS)
 
 %: $(SRCDIR)/test/%.cpp $(HEADER)
-	$(CXX) $(CXXFLAGS) $(NOOPT) $^ -o $(BINDIR)/$@ &
+	$(CXX) $(CXXFLAGS) $(NOOPT) $^ -o $(BINDIR)/$@
 	$(CXX) $(CXXFLAGS) $(OPT) $^ -o $(BINDIR)/$@_opt
 
 .PHONY: clean

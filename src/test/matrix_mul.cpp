@@ -18,9 +18,11 @@ inline Number select2AndTrans (const Number& x) {
 
 int main(int argc, char const *argv[]) {
 
+  omp_set_num_threads(atoi(argv[1]));
+
   // costruisco l'input
   auto v = Sequence<Number>();
-  for(size_t i = 0; i < 1000; i++) {
+  for(size_t i = 0; i < 100; i++) {
     auto w = Sequence<Number>();
     for(size_t j = 0; j < 100; j++) {
       std::move(w).push_back((int)(i+j));

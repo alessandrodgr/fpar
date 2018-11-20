@@ -385,9 +385,9 @@ namespace fp {
     if (x.isBottom() or !x.isSequence()) return Bottom;
     Sequence<T> s = x;
     if (s.size() != 2) return Bottom; // controllo che in input ci sia una coppia
-    auto _ys = s.front();
-    auto z = *s.back();
-    // controllo che il secondo elemento sia una sequenza
+    auto _ys = *s.front();
+    auto z = s.back();
+    // controllo che il primo elemento sia una sequenza
     if (_ys.isBottom() or !_ys.isSequence()) return Bottom;
     Sequence<T> ys = _ys;
     return ys.push_back(z);

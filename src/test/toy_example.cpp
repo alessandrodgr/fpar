@@ -15,8 +15,9 @@ inline Basic foo (const Basic& x) {
 }
 
 int main(int argc, char const *argv[]) {
+  omp_set_num_threads(atoi(argv[1]));
   auto in = Sequence<Basic>();
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < atoi(argv[1]); i++) {
     std::move(in).push_back(i);
   }
 
