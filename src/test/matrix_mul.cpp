@@ -16,6 +16,27 @@ inline Number select2AndTrans (const Number& x) {
   return trans(select<Number>(2)(x));
 }
 
+template <bool par>
+inline Number IP (const Number& x) {
+  auto mul = mul_op<int, Number>;
+  auto add = add_op<int, Number>;
+  return (insert<par>(add, Number(0)) *
+            (apply_to_all<par, Number>(mul) * trans<Number>))(x);
+}
+
+template <bool par>
+inline Number MM (const Number& x) {
+
+  auto aIP = [=](const Number& y) {
+    return apply_to_all<par, Number>(IP<par>)(y);
+  };
+
+  return (apply_to_all<par, Number>(aIP) *
+            (apply_to_all<par, Number>(distl<par, Number>) *
+              (distr<par, Number> *
+                construct<par, Number>({select1, select2AndTrans}))))(x);
+}
+
 int main(int argc, char const *argv[]) {
 
   omp_set_num_threads(atoi(argv[1]));
@@ -32,45 +53,16 @@ int main(int argc, char const *argv[]) {
   Number in = Sequence<Number>({v,v});
 
 
-  auto IP = [=](bool par) {
-    auto mul = mul_op<int, Number>;
-    auto add = add_op<int, Number>;
-    return compose(
-            insert(add, par, Number(0)),
-            compose(
-              apply_to_all<Number>(mul, par),
-              trans<Number>
-            )
-          );
-  };
-
-  auto MM = [=](bool par) {
-    auto aIP = [=](const Number& y) {
-      return apply_to_all<Number>(IP(par), par)(y);
-    };
-
-    return compose(
-            apply_to_all<Number>(aIP, par),
-            compose(
-              apply_to_all<Number>(distl<Number>(par), par),
-              compose(
-                distr<Number>(par),
-                construct<Number>({select1, select2AndTrans}, par)
-              )
-            )
-          );
-  };
-
   std::chrono::high_resolution_clock::time_point seq_t_i, seq_t_f;
   std::chrono::high_resolution_clock::time_point par_t_i, par_t_f;
 
   seq_t_i = std::chrono::high_resolution_clock::now();
-  auto sr = MM(false)(in);
+  auto sr = MM<seq_exec>(in);
   seq_t_f = std::chrono::high_resolution_clock::now();
 
 
   par_t_i = std::chrono::high_resolution_clock::now();
-  auto pr = MM(true)(in);
+  auto pr = MM<par_exec>(in);
   par_t_f = std::chrono::high_resolution_clock::now();
 
   int seq_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>

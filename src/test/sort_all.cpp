@@ -36,22 +36,22 @@ int main(int argc, char const *argv[]) {
   }
 
   auto sortAll =
-    apply_to_all<String>([=](const String& x) {
+    apply_to_all<seq_exec, String>([=](const String& x) {
       std::string s = x;
       std::sort(s.begin(), s.end());
       return s;
-    }, false);
+    });
 
   std::chrono::high_resolution_clock::time_point seq_t_i, seq_t_f;
   std::chrono::high_resolution_clock::time_point par_t_i, par_t_f;
 
   seq_t_i = std::chrono::high_resolution_clock::now();
-  auto sr = apply_to_all<String>(sortAll, false)(in);
+  auto sr = apply_to_all<seq_exec, String>(sortAll)(in);
   seq_t_f = std::chrono::high_resolution_clock::now();
 
 
   par_t_i = std::chrono::high_resolution_clock::now();
-  auto pr = apply_to_all<String>(sortAll, true)(in);
+  auto pr = apply_to_all<par_exec, String>(sortAll)(in);
   par_t_f = std::chrono::high_resolution_clock::now();
 
   int seq_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>

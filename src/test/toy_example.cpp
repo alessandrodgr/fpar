@@ -25,11 +25,11 @@ int main(int argc, char const *argv[]) {
   std::chrono::high_resolution_clock::time_point par_t_i, par_t_f;
 
   seq_t_i = std::chrono::high_resolution_clock::now();
-  apply_to_all<Basic>(foo, false)((Basic)in);
+  apply_to_all<seq_exec, Basic>(foo)((Basic)in);
   seq_t_f = std::chrono::high_resolution_clock::now();
 
   par_t_i = std::chrono::high_resolution_clock::now();
-  apply_to_all<Basic>(foo, true)((Basic)in);
+  apply_to_all<par_exec, Basic>(foo)((Basic)in);
   par_t_f = std::chrono::high_resolution_clock::now();
 
   int seq_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>

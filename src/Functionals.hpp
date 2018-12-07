@@ -26,7 +26,19 @@ namespace fp {
    Nello specifico, in questa implementazione, restituiscono lambda expressions
   */
 
-  /*! \brief Composizione di funzioni
+  /*! \brief Composizione di funzioni (operatore)
+   *  \param f Funzione più esterna
+   *  \param g Funzione più interna
+   *  \return x -> f(g(x))
+   */
+  template <typename F, typename G>
+  auto operator*(F f, G g) {
+    return [=](const auto& x) {
+      return f(g(x));
+    };
+  }
+
+  /*! \brief Composizione di funzioni (funzione)
    *  \param f Funzione più esterna
    *  \param g Funzione più interna
    *  \return x -> f(g(x))
@@ -43,12 +55,12 @@ namespace fp {
    *  \param par se true eseguito su più thread
    *  \return x -> <f1(x), f2(x), ..., fN(x)>
    */
-  template <typename T, typename F>
-  inline auto construct (std::initializer_list<F> fs, bool par) {
+  template <bool par, typename T, typename F>
+  inline auto construct (std::initializer_list<F> fs) {
     return [=](const T& x) -> T {
       auto fs_list = fs.begin();
       auto res = Sequence<T>(fs.size());
-      if(par) {
+      if constexpr (par) {
         #pragma omp parallel for
         for (size_t i = 0; i < fs.size(); i++) {
           std::move(res).set(i, (fs_list[i])(x));
@@ -69,11 +81,11 @@ namespace fp {
    *  \param par se true eseguito su più thread
    *  \return x -> (p(x) ? f(x) : g(x))
    */
-  template <typename T, typename P, typename F, typename G>
-  inline auto condition (P p, F f, G g, bool par) {
+  template <bool par, typename T, typename P, typename F, typename G>
+  inline auto condition (P p, F f, G g) {
     return [=](const T& x) -> T {
       T _px;
-      if (par) { // calcolo in parallelo
+      if constexpr (par) { // calcolo in parallelo
         // utile solo se p(x) "costa" quanto f(x) e g(x)
         // sorta di valutazione eager ma in parallelo
         auto fpx = std::async(std::launch::async, [=](){return p(x);});
@@ -118,8 +130,8 @@ namespace fp {
    *  \param uf Valore di accumulazione di default
    *  \return <x1, x2, .., xN> -> f(uf, f(x1, f(x2, ...f(xN-1, xN))))
    */
-  template <typename T, typename F>
-  inline auto insert (F f, bool par, const T& n) {
+  template <bool par, typename T, typename F>
+  inline auto insert (F f, const T& n) {
     return [=](const T& x) -> T {
       if (x.isBottom() or !x.isSequence()) return Bottom;
       Sequence<T> s = x;
@@ -132,7 +144,7 @@ namespace fp {
         [&](operand_t a, operand_t b) {
           return f(Sequence<T>({a, b}));
         };
-      if (par) {
+      if constexpr (par) {
         auto els = s.size();
         auto n_threads = omp_get_max_threads();
         auto locals = std::vector<decltype(f(x))>(n_threads);
@@ -161,13 +173,13 @@ namespace fp {
    *  \param par se true eseguito su più thread
    *  \return <x1, x2, .., xN> -> <f(x1), f(x2), ..., f(xN)>
    */
-  template <typename T, typename F>
-  inline auto apply_to_all (F f, bool par) {
+  template <bool par, typename T, typename F>
+  inline auto apply_to_all (F f) {
     return [=](const T& x) -> T {
       if (x.isBottom() or !x.isSequence()) return Bottom;
       Sequence<T> s = x;
       auto res = Sequence<T>(s.size());
-      if (par) {
+      if constexpr (par) {
         #pragma omp parallel for
         for (size_t i = 0; i < s.size(); i++) {
           std::move(res).set(i, f(s[i]));

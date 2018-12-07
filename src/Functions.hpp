@@ -75,60 +75,56 @@ namespace fp {
    *  \param par se true, eseguito in parallelo
    *  \return <y, <z1,z2,..,zN> -> <<y,z1>,<y,z2>,...,<y,zN>>
    */
-  template <typename T>
-  inline auto distl (bool par) {
-    return [=](const T& x) -> T {
-      if (x.isBottom() or !x.isSequence()) return Bottom;
-      Sequence<T> s = x;
-      if (s.size() != 2) return Bottom; // controllo che in input ci sia una coppia
-      auto y = *s.front();
-      auto _zs = *s.back();
-      // controllo che il secondo elemento sia una sequenza
-      if (_zs.isBottom() or !_zs.isSequence()) return Bottom;
-      Sequence<T> zs = _zs; // cast a sequenza
-      auto res = Sequence<T>(zs.size());
-      if (par) {
-        #pragma omp parallel for
-        for (size_t i = 0; i < zs.size(); i++) {
-          std::move(res).set(i, Sequence<T>({y, zs[i]}));
-        }
-      } else {
-        for (size_t i = 0; i < zs.size(); i++) {
-          std::move(res).set(i, Sequence<T>({y, zs[i]}));
-        }
+  template <bool par, typename T>
+  inline T distl (const T& x) {
+    if (x.isBottom() or !x.isSequence()) return Bottom;
+    Sequence<T> s = x;
+    if (s.size() != 2) return Bottom; // controllo che in input ci sia una coppia
+    auto y = *s.front();
+    auto _zs = *s.back();
+    // controllo che il secondo elemento sia una sequenza
+    if (_zs.isBottom() or !_zs.isSequence()) return Bottom;
+    Sequence<T> zs = _zs; // cast a sequenza
+    auto res = Sequence<T>(zs.size());
+    if constexpr (par) {
+      #pragma omp parallel for
+      for (size_t i = 0; i < zs.size(); i++) {
+        std::move(res).set(i, Sequence<T>({y, zs[i]}));
       }
-      return res;
-    };
+    } else {
+      for (size_t i = 0; i < zs.size(); i++) {
+        std::move(res).set(i, Sequence<T>({y, zs[i]}));
+      }
+    }
+    return res;
   }
 
   /*! \brief Distribuzione di un oggetto in una sequenza
    *  \param par se true, eseguito in parallelo
    *  \return <<y1,y2,..,yN>,z> -> <<y1,z>,<y2,z>,...,<yN,z>>
    */
-  template <typename T>
-  inline auto distr (bool par) {
-    return [=](const T& x) -> T {
-      if (x.isBottom() or !x.isSequence()) return Bottom;
-      Sequence<T> s = x;
-      if (s.size() != 2) return Bottom; // controllo che in input ci sia una coppia
-      auto _ys = *s.front();
-      auto z = *s.back();
-      // controllo che il secondo elemento sia una sequenza
-      if (_ys.isBottom() or !_ys.isSequence()) return Bottom;
-      Sequence<T> ys = _ys; // cast a sequenza
-      auto res = Sequence<T>(ys.size());
-      if (par) {
-        #pragma omp parallel for
-        for (size_t i = 0; i < ys.size(); i++) {
-          std::move(res).set(i, Sequence<T>({ys[i], z}));
-        }
-      } else {
-        for (size_t i = 0; i < ys.size(); i++) {
-          std::move(res).set(i, Sequence<T>({ys[i], z}));
-        }
+  template <bool par, typename T>
+  inline T distr (const T& x) {
+    if (x.isBottom() or !x.isSequence()) return Bottom;
+    Sequence<T> s = x;
+    if (s.size() != 2) return Bottom; // controllo che in input ci sia una coppia
+    auto _ys = *s.front();
+    auto z = *s.back();
+    // controllo che il secondo elemento sia una sequenza
+    if (_ys.isBottom() or !_ys.isSequence()) return Bottom;
+    Sequence<T> ys = _ys; // cast a sequenza
+    auto res = Sequence<T>(ys.size());
+    if constexpr (par) {
+      #pragma omp parallel for
+      for (size_t i = 0; i < ys.size(); i++) {
+        std::move(res).set(i, Sequence<T>({ys[i], z}));
       }
-      return res;
-    };
+    } else {
+      for (size_t i = 0; i < ys.size(); i++) {
+        std::move(res).set(i, Sequence<T>({ys[i], z}));
+      }
+    }
+    return res;
   }
 
   /*! \brief Restituisce il numero di elementi di una sequenza
