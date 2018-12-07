@@ -1,4 +1,4 @@
-# fpar
+# FPar
 A parallel implementation of [Backus FP](backus_turingaward_lecture.pdf) programming language as an embedded DSL in C++17
 
 ## Features
