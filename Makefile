@@ -3,7 +3,8 @@ OPT =	-O2
 NOOPT =	-O0
 CXXFLAGS =	--std=c++17 -Wall -Isrc -pedantic-errors -Wno-unused-variable -fopenmp
 SRCDIR   = src
-BINDIR   = bin
+BINDIR   = test
+TESTDIR   = test
 HEADER	 = $(SRCDIR)/Backus.hpp \
 					 $(SRCDIR)/Object.hpp	\
 					 $(SRCDIR)/Functions.hpp \
@@ -14,7 +15,7 @@ TARGETS	 = matrix_mul \
 
 all: $(TARGETS)
 
-%: $(SRCDIR)/test/%.cpp $(HEADER)
+%: $(TESTDIR)/%.cpp $(HEADER)
 	$(CXX) $(CXXFLAGS) $(NOOPT) $^ -o $(BINDIR)/$@
 	$(CXX) $(CXXFLAGS) $(OPT) $^ -o $(BINDIR)/$@_opt
 
