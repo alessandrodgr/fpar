@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <chrono>
 
-using namespace fp;
+using namespace fpar;
 
 // istanzio il type system con il supporto per le stringhe
 using String = Object<std::string>;

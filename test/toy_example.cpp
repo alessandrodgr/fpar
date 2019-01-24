@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <chrono>
 
-using namespace fp;
+using namespace fpar;
 
 // istanzio il type system con il supporto per int, bool, float e std::string
 using Basic = Object<int, bool, float, std::string>;

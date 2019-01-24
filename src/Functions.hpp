@@ -12,7 +12,7 @@
 #include <vector>
 #include <omp.h>
 
-namespace fp {
+namespace fpar {
 
   /*! \brief Operazione di accesso ad elementi di una sequenza
    *  \param i Indice (compreso tra 1 ed N) dell'elemento da accedere

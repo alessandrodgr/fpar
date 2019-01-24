@@ -19,7 +19,7 @@
 #include <omp.h>
 #include <algorithm>
 
-namespace fp {
+namespace fpar {
 
   /*
    I funzionali (o functional forms) restituiscono funzioni.
