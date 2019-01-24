@@ -10,7 +10,7 @@
 #include <immer/box.hpp>
 #include <immer/flex_vector.hpp>
 
-namespace fp {
+namespace fpar {
 
   /*! \class Object
    *  \brief Tipo degli oggetti di un sistema FP like.

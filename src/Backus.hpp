@@ -9,7 +9,7 @@
 #include "Functions.hpp"
 #include "Functionals.hpp"
 
-namespace fp {
+namespace fpar {
   constexpr bool par_exec = true;
   constexpr bool seq_exec = true;
 }
