@@ -24,4 +24,4 @@ Since this is a header-only library, it is sufficient to:
 * [immer](https://github.com/arximboldi/immer) library
 
 ## Examples
-Some examples are provided in the [tests](src/test) directory. They show both very basic programs and more complex ones, like matrix multiplication or sorting
+Some examples are provided in the [tests](test) directory. They show both very basic programs and more complex ones, like matrix multiplication or sorting
