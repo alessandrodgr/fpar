@@ -23,5 +23,8 @@ Since this is a header-only library, it is sufficient to:
 * OpenMP 4 or newer
 * [immer](https://github.com/arximboldi/immer) library
 
+## Usage
+For the detailed documentation refer to the [wiki](../../wiki)
+
 ## Examples
 Some examples are provided in the [tests](test) directory. They show both very basic programs and more complex ones, like matrix multiplication or sorting
