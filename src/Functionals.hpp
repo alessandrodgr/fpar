@@ -229,6 +229,39 @@ namespace fpar {
     };
   }
 
+  /*! \brief Operazione di "zip"
+   *  \param f  Funzione da applicare agli elementi che occorono
+                nella stessa posizione
+   *  \param par se true eseguito su più thread
+   *  \return <<x1, ..., xN>, <y1, ..., yN>>
+                -> <f(x1, y1), ..., f(xN, yN)>
+   */
+  template <bool par, typename T, typename F>
+  inline auto zip (F f) {
+    return [=](const T& x) -> T {
+      if (x.isBottom() or !x.isSequence()) return Bottom;
+      Sequence<T> s = x;
+      if (s.size() != 2) return Bottom;
+      auto _y = *s.front();
+      auto _z = *s.back();
+      if (!_y.isSequence() or !_z.isSequence()) return Bottom;
+      Sequence<T> y = _y;
+      Sequence<T> z = _z;
+      if (y.size() != z.size()) return Bottom;
+      auto res = Sequence<T>(y.size());
+      if constexpr (par) {
+        #pragma omp parallel for
+        for (size_t i = 0; i < y.size(); i++) {
+          std::move(res).set(i, f(Sequence<T>({y[i], z[i]})));
+        }
+      } else {
+        for (size_t i = 0; i < y.size(); i++) {
+          std::move(res).set(i, f(Sequence<T>({y[i], z[i]})));
+        }
+      }
+      return res;
+    };
+  }
 }
 
 #endif
