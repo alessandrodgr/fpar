@@ -195,37 +195,23 @@ namespace fpar {
     if (x.isBottom() or !x.isSequence()) return Bottom;
     using seq_t = Sequence<T>;
     seq_t s = x;
-    using seq_it_t = typename seq_t::iterator;
-    std::vector<seq_it_t> row_heads;
-    row_heads.reserve(s.size());
     size_t els = 0;
-    // salvo gli iteratori (teste) di ogni sequenza
-    // e calcolo il numero minimo M di elementi
-    // (le sequenze vengono trasposte fino ad M)
-    // seq_t row;
     for (auto _row : s) {
       if (_row->isBottom() or !_row->isSequence()) return Bottom;
-      seq_t* row = new seq_t(*_row); // problema è qua
-      if (els == 0 or row->size() < els) els = row->size();
-      row_heads.push_back(row->begin());
+      seq_t row = *_row;
+      if (els == 0 or row.size() < els) els = row.size();
     }
 
-    // sequenza contenente le sequenze trasposte
-    auto transd = seq_t();
+    seq_t transd;
     for (size_t i = 0; i < els; i++) {
-      // per ogni i si traspone la i-esima "colonna"
-
-      auto transd_row = seq_t();
-
-      // prende la testa di ogni riga e la mette in quella trasposta
-      // poi sposta gli iteratori di testa
-
-      for (auto& row_head : row_heads) {
-        std::move(transd_row).push_back(*row_head++);
+      seq_t transd_row;
+      for (size_t j = 0; j < s.size(); j++) {
+        seq_t jth_head = *(s[j]);
+        std::move(transd_row).push_back(jth_head[i]);
       }
-
       std::move(transd).push_back(transd_row);
     }
+
     return transd;
   }
 
