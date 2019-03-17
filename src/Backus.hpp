@@ -11,7 +11,7 @@
 
 namespace fpar {
   constexpr bool par_exec = true;
-  constexpr bool seq_exec = true;
+  constexpr bool seq_exec = false;
 }
 
 #endif
