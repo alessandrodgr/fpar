@@ -11,12 +11,16 @@ A data parallel implementation of [Backus FP](backus_turingaward_lecture.pdf) pr
 * Concise syntax
 
 ## Installation
-Since this is a header-only library, it is sufficient to:
-* download this repository in your project directory
-* include the main header file
-```cpp
-#include "fpar/src/fpar.hpp"
+The library is a header-only library, but in order to download its dependency needs to be installed.
+Thus after downloading the repository you can do the following:
+
+```sh
+mkdir build
+cd build
+../configure --no-bin --install-path=<install-path>
+make install
 ```
+All the header will be installed on `./<install-path>/include`.
 
 ### Dependencies
 * a compiler for C++17

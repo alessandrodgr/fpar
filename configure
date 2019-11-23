@@ -10,15 +10,19 @@ usage="\
 Usage: $0 [OPTION]...
 
   Build Options:
+    --no-bin             do not compile examples and benchmarks (default:true)
     --release            set release flags (default:false)
     --cxx-path=PATH      CXX compiler path
+    --install-path=PATH  set the installation path
     --prefix-path=PATH   additional path for libraries
 "
 
 # default values
+COMPILE_BIN="yes"
 RELEASE="no"
-PREFIX_PATH=""
 CXX_PATH=""
+INSTALL_PATH=""
+PREFIX_PATH=""
 
 for i in "$@"
 do
@@ -27,19 +31,26 @@ case $i in
       echo "$usage"
       exit
     ;;
-    --release)
-      RELEASE=yes
+    --no-bin)
+      COMPILE_BIN=no
       shift # past argument=value
     ;;
-    --prefix-path=*)
-      PREFIX_PATH="${i#*=}"
+    --release)
+      RELEASE=yes
       shift # past argument=value
     ;;
     --cxx-path=*)
       CXX_PATH="${i#*=}"
       shift # past argument=value
     ;;
-    
+    --install-path=*)
+      INSTALL_PATH="${i#*=}"
+      shift # past argument=value
+    ;;
+    --prefix-path=*)
+      PREFIX_PATH="${i#*=}"
+      shift # past argument=value
+    ;;
     *)
       echo "error: unknown option";echo
       echo "$usage"
@@ -48,11 +59,6 @@ case $i in
 esac
 done
 
-# # echo configuration
-# echo "RELEASE      = ${RELEASE}"
-# echo "PREFIX_PATH  = ${PREFIX_PATH}"
-# echo "CXX_PATH     = ${CXX_PATH}"
-
 CMAKE_ARGS=""
 if [ $RELEASE = "yes" ] ; then
   CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_BUILD_TYPE=Release"
@@ -60,12 +66,20 @@ else
   CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_BUILD_TYPE=Debug"
 fi
 
-if [ "${PREFIX_PATH}" != "" ] ; then
-  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_PREFIX_PATH=$PREFIX_PATH"
+if [ $COMPILE_BIN = "yes" ] ; then
+  CMAKE_ARGS="$CMAKE_ARGS -D COMPILE_BIN=yes"
 fi
 
 if [ "$CXX_PATH" != "" ] ; then
   CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_CXX_COMPILER=$CXX_PATH"
+fi
+
+if [ "$INSTALL_PATH" != "" ] ; then
+  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_INSTALL_PREFIX=$INSTALL_PATH"
+fi
+
+if [ "$PREFIX_PATH" != "" ] ; then
+  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_PREFIX_PATH=$PREFIX_PATH"
 fi
 
 # call cmake

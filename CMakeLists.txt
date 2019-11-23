@@ -18,18 +18,33 @@ find_package(OpenMP)
 if(NOT OPENMP_FOUND)
   message(FATAL_ERROR "OPENMP library not found")
 endif()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 
 # Find/Download Immer
-find_path(IMMER_INCLUDE immer/box.hpp)
-if(NOT IMMER_INCLUDE)
 # reference: https://foonathan.net/2016/07/cmake-dependency-handling/
-    message("Download 'immer'")
-    execute_process(COMMAND git submodule update --init -- externals/immer
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    set(IMMER_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/externals/immer)
+find_path(IMMER_INCLUDE immer/box.hpp)
+if(IMMER_INCLUDE)
+  add_library(immer INTERFACE)
+  target_include_directories(immer INTERFACE ${IMMER_INCLUDE})
+else()
+  message("Unable to find 'immer', will be downloaded...")
+  execute_process(COMMAND git submodule update --init -- externals/immer
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  # set IMMER_INCLUDE properly
+  set(IMMER_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/externals/immer)
+
+  # also install it
+  install(DIRECTORY ${IMMER_INCLUDE}/immer DESTINATION include)
+
+  # for convenience setup a target
+  add_library(immer INTERFACE)
+  target_include_directories(immer INTERFACE
+                             $<BUILD_INTERFACE:${IMMER_INCLUDE}>
+                             $<INSTALL_INTERFACE:include/immer>)
+
+  # need to export target as well
+  install(TARGETS immer EXPORT my_export_set DESTINATION include)
 endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -37,18 +52,23 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
 include(CPack)
 
-# Compile Library
-add_library(fpar src/all.cpp)
-target_include_directories(fpar PUBLIC ./include ${IMMER_INCLUDE})
-target_link_libraries(fpar ${OPENMP} ${PTHREAD})
+if(COMPILE_BIN)
+  # Compile Benches
+  add_executable (matrix_mul benchs/matrix_mul.cpp)
+  target_include_directories(matrix_mul PUBLIC ./src)
+  target_link_libraries(matrix_mul immer)
 
-# Compile Benches
-add_executable (matrix_mul benchs/matrix_mul.cpp)
-target_link_libraries(matrix_mul fpar ${OPENMP} ${PTHREAD})
+  add_executable (sort_all benchs/sort_all.cpp)
+  target_include_directories(sort_all PUBLIC ./src)
+  target_link_libraries(sort_all immer)
 
-add_executable (sort_all benchs/sort_all.cpp)
-target_link_libraries(sort_all fpar ${OPENMP} ${PTHREAD})
+  # Compile Examples
+  add_executable (toy_example examples/toy_example.cpp)
+  target_include_directories(toy_example PUBLIC ./src)
+  target_link_libraries(toy_example immer)
+endif()
 
-# Compile Examples
-add_executable (toy_example examples/toy_example.cpp)
-target_link_libraries(toy_example fpar ${OPENMP} ${PTHREAD})
+# Install Library
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/src/fpar
+        DESTINATION include
+        FILES_MATCHING PATTERN "*.hpp")
