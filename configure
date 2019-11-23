@@ -1,0 +1,73 @@
+#!/bin/sh
+# A very rudimentally configure script
+
+set -e # exit at the first error
+
+dirname_0=`dirname $0`
+sourcedir=`cd $dirname_0 && pwd`
+
+usage="\
+Usage: $0 [OPTION]...
+
+  Build Options:
+    --release            set release flags (default:false)
+    --cxx-path=PATH      CXX compiler path
+    --prefix-path=PATH   additional path for libraries
+"
+
+# default values
+RELEASE="no"
+PREFIX_PATH=""
+CXX_PATH=""
+
+for i in "$@"
+do
+case $i in
+    --help)
+      echo "$usage"
+      exit
+    ;;
+    --release)
+      RELEASE=yes
+      shift # past argument=value
+    ;;
+    --prefix-path=*)
+      PREFIX_PATH="${i#*=}"
+      shift # past argument=value
+    ;;
+    --cxx-path=*)
+      CXX_PATH="${i#*=}"
+      shift # past argument=value
+    ;;
+    
+    *)
+      echo "error: unknown option";echo
+      echo "$usage"
+      exit
+    ;;
+esac
+done
+
+# # echo configuration
+# echo "RELEASE      = ${RELEASE}"
+# echo "PREFIX_PATH  = ${PREFIX_PATH}"
+# echo "CXX_PATH     = ${CXX_PATH}"
+
+CMAKE_ARGS=""
+if [ $RELEASE = "yes" ] ; then
+  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_BUILD_TYPE=Release"
+else
+  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_BUILD_TYPE=Debug"
+fi
+
+if [ "${PREFIX_PATH}" != "" ] ; then
+  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_PREFIX_PATH=$PREFIX_PATH"
+fi
+
+if [ "$CXX_PATH" != "" ] ; then
+  CMAKE_ARGS="$CMAKE_ARGS -D CMAKE_CXX_COMPILER=$CXX_PATH"
+fi
+
+# call cmake
+set -x
+cmake $CMAKE_ARGS "$sourcedir"
